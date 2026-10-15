@@ -1,0 +1,1627 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinium - Tenant Admin</title>
+    <!-- SheetJS library for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #0a1929;
+            color: #e0e0e0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 80px;
+            background-color: #0d2137;
+            border-right: 1px solid #1e3a5f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+            color: #7eb8da;
+            text-decoration: none;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: #1e3a5f;
+        }
+
+        .sidebar-item.active {
+            border-left: 3px solid #00bcd4;
+        }
+
+        .sidebar-item svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-item span {
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 80px;
+            padding: 30px 40px;
+            overflow-y: auto;
+            min-height: 100vh;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #ffffff;
+        }
+
+        .back-link {
+            color: #7eb8da;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #00bcd4;
+        }
+
+        /* Role Info */
+        .role-info {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1e3a5f;
+        }
+
+        .role-info-item label {
+            display: block;
+            font-size: 12px;
+            color: #6b8299;
+            margin-bottom: 5px;
+        }
+
+        .role-info-item .value {
+            font-size: 16px;
+            color: #ffffff;
+        }
+
+        .status-active {
+            color: #4caf50;
+        }
+
+        .status-active::before {
+            content: '●';
+            margin-right: 6px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #1e3a5f;
+        }
+
+        .tab {
+            padding: 12px 0;
+            cursor: pointer;
+            color: #7eb8da;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: #ffffff;
+        }
+
+        .tab.active {
+            color: #00bcd4;
+            border-bottom-color: #00bcd4;
+        }
+
+        /* Search and Export Row */
+        .toolbar-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            background-color: #0d2137;
+            border: 1px solid #1e3a5f;
+            border-radius: 6px;
+            padding: 10px 15px 10px 40px;
+            color: #e0e0e0;
+            font-size: 14px;
+            width: 300px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #00bcd4;
+        }
+
+        .search-box input::placeholder {
+            color: #6b8299;
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #6b8299;
+        }
+
+        /* Export Button */
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #00bcd4;
+            color: #0a1929;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .export-btn:hover {
+            background-color: #00a5bb;
+        }
+
+        .export-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Permissions Table */
+        .permissions-table {
+            width: 100%;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 120px;
+            padding: 15px 20px;
+            background-color: #0d2137;
+            border-radius: 8px 8px 0 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #7eb8da;
+            border-bottom: 1px solid #1e3a5f;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .permission-row {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 120px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #1e3a5f;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .permission-row:hover {
+            background-color: #0d2137;
+        }
+
+        .permission-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .permission-name-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .expand-icon {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            color: #7eb8da;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(90deg);
+        }
+
+        .expand-icon.hidden {
+            visibility: hidden;
+        }
+
+        .permission-badge {
+            background-color: #1e3a5f;
+            color: #00bcd4;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .permission-description {
+            color: #6b8299;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .permission-status {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Checkbox Toggle */
+        .checkbox-toggle {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background-color: #7c4dff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .checkbox-toggle:hover {
+            background-color: #9d7aff;
+        }
+
+        .checkbox-toggle svg {
+            width: 14px;
+            height: 14px;
+            color: white;
+        }
+
+        .checkbox-toggle.unchecked {
+            background-color: transparent;
+            border: 2px solid #6b8299;
+        }
+
+        .checkbox-toggle.unchecked svg {
+            display: none;
+        }
+
+        /* Indentation for nested levels */
+        .indent-0 .permission-name-content { padding-left: 0; }
+        .indent-1 .permission-name-content { padding-left: 28px; }
+        .indent-2 .permission-name-content { padding-left: 56px; }
+        .indent-3 .permission-name-content { padding-left: 84px; }
+        .indent-4 .permission-name-content { padding-left: 112px; }
+        .indent-5 .permission-name-content { padding-left: 140px; }
+
+        /* Children container - hidden by default */
+        .children-container {
+            display: none;
+            overflow: hidden;
+        }
+
+        .children-container.expanded {
+            display: block;
+        }
+
+        /* Empty state */
+        .empty-description {
+            color: #4a5568;
+        }
+
+        /* Logo */
+        .logo {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 30px;
+            color: #00bcd4;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background-color: #0d2137;
+            border-radius: 8px;
+            border: 1px solid #1e3a5f;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-label {
+            color: #6b8299;
+            font-size: 13px;
+        }
+
+        .stat-value {
+            color: #00bcd4;
+            font-weight: 600;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        
+        <a href="#" class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M9 3v18"/>
+            </svg>
+            <span>Tenants</span>
+        </a>
+        
+        <a href="#" class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18"/>
+                <path d="M9 21V9"/>
+            </svg>
+            <span>Masters</span>
+        </a>
+        
+        <a href="#" class="sidebar-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Users</span>
+        </a>
+        
+        <a href="#" class="sidebar-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <span>Audit Trail</span>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h1 class="page-title">Tenant Admin</h1>
+        
+        <a href="#" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5"/>
+                <path d="M12 19l-7-7 7-7"/>
+            </svg>
+            Roles
+        </a>
+
+        <!-- Role Info -->
+        <div class="role-info">
+            <div class="role-info-item">
+                <label>Role Name</label>
+                <div class="value" id="roleName">Supervisor</div>
+            </div>
+            <div class="role-info-item">
+                <label>Description</label>
+                <div class="value">Supervisor role with broad access</div>
+            </div>
+            <div class="role-info-item">
+                <label>No. of Users</label>
+                <div class="value">4</div>
+            </div>
+            <div class="role-info-item">
+                <label>Status</label>
+                <div class="value status-active">Active</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab">Users</div>
+            <div class="tab active">Permissions</div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">Total Permissions:</span>
+                <span class="stat-value" id="totalPermissions">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Granted:</span>
+                <span class="stat-value" id="grantedCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Denied:</span>
+                <span class="stat-value" id="deniedCount">0</span>
+            </div>
+        </div>
+
+        <!-- Search and Export Row -->
+        <div class="toolbar-row">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input type="text" placeholder="Search permissions" id="searchInput">
+            </div>
+            <button class="export-btn" onclick="exportPermissionsToExcel()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export to Excel
+            </button>
+        </div>
+
+        <!-- Permissions Table -->
+        <div class="permissions-table">
+            <div class="table-header">
+                <div>Permissions</div>
+                <div>Description</div>
+                <div style="text-align: center;">Status</div>
+            </div>
+            <div id="permissionsTree"></div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span id="toastMessage">Excel file downloaded successfully!</span>
+    </div>
+
+    <script>
+        // Permission states storage
+        const permissionStates = {};
+
+        // Complete Permissions data structure based on the Excel catalogue
+        // Following naming convention: "View [Component]", "Add [Component]", "Edit [Component]", etc.
+        const permissionsData = {
+            "Global – Search": {
+                count: 33,
+                label: "View Global Search",
+                description: "Single Search permission model; Search can be entered from top header and left navigation.",
+                children: {
+                    "View Recent Searches": {
+                        description: "View the user's recent searches."
+                    },
+                    "Saved Searches": {
+                        count: 5,
+                        label: "View Saved Searches",
+                        description: "View saved searches.",
+                        children: {
+                            "Save New Search": { description: "Create a saved search." },
+                            "Edit Saved Search": { description: "Edit a saved search." },
+                            "Delete Saved Search": { description: "Delete a saved search." },
+                            "Manage Saved Searches": { description: "Controls access to the Manage Saved Searches view opened through Manage." }
+                        }
+                    },
+                    "Advanced Filter": {
+                        count: 2,
+                        label: "Use Advanced Filter",
+                        description: "Advanced Filter panel shown below the search input.",
+                        children: {
+                            "Save Advanced Filter Search": { description: "Save search from Advanced Filter." }
+                        }
+                    },
+                    "Search Results": {
+                        count: 3,
+                        label: "View Search Results",
+                        description: "View search results.",
+                        children: {
+                            "Save Search from Results": { description: "Save Search from Results." },
+                            "Sort Search Results": { description: "Sort control shown with Relevancy, Newest First and Oldest First options." }
+                        }
+                    }
+                }
+            },
+            "Global – Notifications": { 
+                label: "View Global Notifications",
+                description: "Global notification centre."
+            },
+            "Global – Bookmarks": { 
+                label: "View Global Bookmarks",
+                description: "Global/contextual bookmark capability."
+            },
+            "Global – Help": { 
+                label: "View Global Help",
+                description: "Global Help / Support capability."
+            },
+            "Home": {
+                count: 7,
+                children: {
+                    "View Landing Page": { description: "Controls access to the post-login landing page." },
+                    "View Home Tasks": { description: "Home component; not the standalone Tasks module." },
+                    "View Alerts": { description: "Home component; not a separate product module." },
+                    "View Anomalies": { description: "Home component only; anomalies do not have a separate module." },
+                    "Create New Case": { description: "Quick action; should ultimately respect Case creation permission." },
+                    "Create New Target": { description: "Quick action; should ultimately respect Target creation permission." },
+                    "Use Ask Infinium": { description: "AI entry point; exact granular permission to be determined from module screenshots/current permissions." }
+                }
+            },
+            "Tasks": {
+                count: 16,
+                label: "View Tasks",
+                description: "Standalone Tasks module. Also enables task list view.",
+                children: {
+                    "Task Listing": {
+                        count: 4,
+                        children: {
+                            "Find Tasks": { description: "Use the Find/search field to narrow the Tasks listing." },
+                            "View My Assigned Tasks": { description: "View tasks assigned to the logged-in user." },
+                            "View Tasks I Assigned": { description: "View tasks assigned by the logged-in user." }
+                        }
+                    },
+                    "Create Task": { description: "Create a new task using the Add New Task action." },
+                    "Task Detail > Comments": {
+                        count: 2,
+                        label: "View Task Comments",
+                        description: "Controls access to the Comments tab and existing task comments.",
+                        children: {
+                            "Add Task Comment": { description: "Allows the user to add a new comment to the task." }
+                        }
+                    },
+                    "Task Detail > Attachments": {
+                        count: 2,
+                        label: "View Task Attachments",
+                        description: "Controls access to the Attachments tab and existing task attachments.",
+                        children: {
+                            "Add Task Attachment": { description: "Allows the user to upload a new attachment to the task." }
+                        }
+                    },
+                    "Task Detail > Audit Trail": {
+                        count: 2,
+                        label: "View Task Audit Trail",
+                        description: "Controls access to the task-level Audit Trail tab and audit entries.",
+                        children: {
+                            "Filter Task Audit Trail": { description: "Allows filtering task audit entries by Date Range, User and Event." }
+                        }
+                    }
+                }
+            },
+            "Cases": {
+                count: 178,
+                label: "View Cases",
+                description: "Standalone Cases module. Also enables case list view.",
+                children: {
+                    "Case Listing": {
+                        count: 6,
+                        children: {
+                            "Find Cases": { description: "Use the Find/search field to narrow the Cases listing." },
+                            "Export Cases": { description: "Export the Cases listing as CSV using the export action." },
+                            "Edit Case": { description: "Edit an existing case from the row action menu." },
+                            "Delete Case": { description: "Delete an existing case from the row action menu." },
+                            "Generate Case Report": { description: "Generate a case report from the row action menu." }
+                        }
+                    },
+                    "Create Case": { description: "Create a new case through the Create Case panel." },
+                    "Overview": { 
+                        count: 5,
+                        label: "View Overview",
+                        description: "Overview Tab",
+                        children: {
+                            "Find Overview": { description: "Case-detail search field shown at the top of the workspace." },
+                            "View Case Targets": { description: "Overview contains a Targets component showing the number of targets associated with the case." },
+                            "View Locations": { description: "View Locations in Overview." },
+                            "View IMEI": { description: "Overview contains an IMEI analytical visualization; kept distinct because it exposes a specific intelligence view." },
+                            "View IMSI": { description: "Overview contains an IMSI analytical visualization; kept distinct because it exposes a specific intelligence view." }
+                        }
+                    },
+                    "Analysis": {
+                        count: 60,
+                        label: "View Case Analysis",
+                        description: "Analysis Tab",
+                        children: {
+                            "Summary": {
+                                count: 40,
+                                label: "View Summary",
+                                description: "Summary section within Analysis",
+                                children: {
+                                    "View Timeline": { description: "View the Timeline component and plotted case events." },
+                                    "Timeline – Event Actions": { description: "Search, copy, add to filter, exclude, investigate" },
+                                    "View Timeline Anomalies": { description: "View anomalies associated with the selected timeline event/entity." },
+                                    "View Timeline Resources": { description: "View resources associated with the selected timeline event/entity." },
+                                    "Preview Timeline Resource": { description: "Preview a resource associated with the selected timeline event/entity." },
+                                    "Bookmark Screenshot": { description: "Capture/bookmark the current case view as a screenshot for later reference." },
+                                    "View Keyword Cloud": { description: "View the case-level extracted keyword cloud and its keyword/entity categories." },
+                                    "Case Keyword Event Actions": { description: "Search, copy, exclude, add to filter, investigate" },
+                                    "Use Keyword Inverse Zoom": { description: "Use the Inverse Zoom display control for the keyword visualization." },
+                                    "View Keyword Categories": { description: "Open the Categories panel used to narrow the keyword/entity visualization." },
+                                    "Filter Keyword Categories": { description: "Filter category results using available options such as Top 20, Rare Occurring and Flagged." },
+                                    "View Keyword Entity Distribution": { description: "View the distribution of extracted entities across categories." },
+                                    "View Rare Keywords": { description: "View the Rare Keywords analysis/list." },
+                                    "View Top Keyword URLs/Domains": { description: "View the Most Occurring URLs/Domains analytical section." },
+                                    "View Top Keyword Locations": { description: "View the Most Active Locations analytical section." },
+                                    "View Keyword Language Distribution": { description: "View the Language Distribution analytical section." },
+                                    "View Case Keyword Anomalies": { description: "View anomalies associated with the selected keyword/entity." },
+                                    "View Keyword Resources": { description: "View resources associated with the selected keyword/entity." },
+                                    "Keywords – Bookmark": { description: "Bookmark keywords." },
+                                    "Preview Case Keyword Resource": { description: "Preview a resource associated with the selected keyword/entity." },
+                                    "View Location Movement": { description: "Toggle display of movement information on the map." },
+                                    "Show Location Entities": { description: "Open the entity selector and choose entities to display on the map." },
+                                    "Show Location Geofences": { description: "Open the geofence selector and choose geofences to display." },
+                                    "Case Location Event Actions": { description: "Search, Add to filter, exclude, copy, investigate" },
+                                    "View Case Location Anomalies": { description: "View anomalies associated with the selected location." },
+                                    "Locations – Bookmark": { description: "Bookmark locations." },
+                                    "View Location Resources": { description: "View resources associated with the selected location." },
+                                    "Preview Case Location Resource": { description: "Preview a resource associated with the selected location." }
+                                }
+                            },
+                            "Connections": {
+                                count: 10,
+                                label: "View Connection Graph",
+                                description: "Connections graph view",
+                                children: {
+                                    "Case Connection Event Actions": { description: "Search, Add to filter, Exclude, Copy, Information" },
+                                    "Find Shortest Path": { description: "Find shortest path between entities." },
+                                    "Change Case Connection Graph Layout": { description: "Change the graph layout using the available Layout control; current screenshot shows Network." },
+                                    "View Case Connection Graph Controls": { description: "Open the Graph Controls panel for connection-graph display/analysis settings." },
+                                    "View Connection Anomalies": { description: "View anomalies associated with connections." },
+                                    "View Case Connection Resources": { description: "View resources associated with connections." },
+                                    "Preview Case Connection Resource": { description: "Preview a resource associated with the selected connection/entity." }
+                                }
+                            }
+                        }
+                    },
+                    "Resources": {
+                        count: 80,
+                        label: "View Resources",
+                        description: "Resources Tab",
+                        children: {
+                            "View Case Board": { description: "Case Board section." },
+                            "Assets": {
+                                count: 25,
+                                label: "View Assets",
+                                description: "Assets section.",
+                                children: {
+                                    "View Web Uploads": { description: "Show the Web Uploads statistics card and its upload count/statistics." },
+                                    "View FTP": { description: "Show the FTP statistics card and its upload count/statistics." },
+                                    "View OSINT Platforms": { description: "Show the OSINT Platforms statistics card and its upload count/statistics." },
+                                    "View Mobile Uploads": { description: "Show the Mobile Uploads statistics card and its upload count/statistics." },
+                                    "View API Uploads": { description: "Show the API statistics card and its upload count/statistics." },
+                                    "View Live Link": { description: "Show the Live Link statistics card and its upload count/statistics." },
+                                    "View Content Types": { description: "Show the Content Types visualization." },
+                                    "View Data Upload Timeline": { description: "Show the Data Upload Timeline visualization and upload activity over time." },
+                                    "View File Formats": { description: "Show the File Formats statistics." },
+                                    "View Data Formats": { description: "Show the data format level stats." },
+                                    "View Unsupported Resources": { description: "Allow the user to open and view the Unsupported Resources list from Assets." },
+                                    "Find Unsupported Resources": { description: "Allow the user to search/filter the Unsupported Resources list." },
+                                    "Discard Unsupported Resource": { description: "Allow the user to discard an unsupported resource." },
+                                    "View Pending Actions": { description: "Show and open Pending Action from Assets." },
+                                    "View Asset Analysis": { description: "Show and use View Analysis to navigate from Assets to Analysis." },
+                                    "Add Resources to Assets": { description: "Show and use Add Resources from Assets." },
+                                    "Select Target": { description: "Select target when adding resources." },
+                                    "Detect Data Format": { description: "If hidden, the default value is selected as Auto detect." },
+                                    "Set Analysis Preference": { description: "If hidden, the default value is Inline selected." },
+                                    "Add Resource to Case Diary": { description: "Add resource to Case Diary." },
+                                    "Run Resource Analytics": { description: "Allow execution of on-demand analytics jobs from Assets." },
+                                    "View Case Asset Audit Trail": { description: "Allow the user to open and view the case-level Audit Trail under Assets." },
+                                    "Search Case Asset Audit Trail": { description: "Allow the user to search the displayed case-level audit records." },
+                                    "Filter Case Asset Audit Trail": { description: "Allow the user to filter audit records by Date Range, User and Event." }
+                                }
+                            },
+                            "Resource Detail": {
+                                count: 30,
+                                label: "View Resource Detail",
+                                description: "Resource Detail section.",
+                                children: {
+                                    "Refresh Resources": { description: "Refresh the Resources tab and its displayed resource/insight data." },
+                                    "Add Resources to Resource Detail": { description: "Add resources to the case from the Resources tab." },
+                                    "Search Resource Keywords": { description: "Search within the resource-insights results." },
+                                    "View Resource Keyword Categories": { description: "Open and use category-based filtering/navigation for resource insights." },
+                                    "View Resource Keyword Controls": { description: "Access the available view controls for the resource-insights visualization." },
+                                    "View Resource Keywords": { description: "View keyword insights derived from the selected/individual resource context." },
+                                    "View Resource Identities": { description: "View identity-based resource insights." },
+                                    "View Resource Languages": { description: "View language-based resource insights." },
+                                    "View Resource Summary": { description: "View summary-level resource insights." },
+                                    "View Resource Device": { description: "View device-based resource insights." },
+                                    "Resource Keyword Event Actions": { description: "Search, Add to filter, exclude, copy, investigate" },
+                                    "Preview Resource Insight Keyword": { description: "Preview resource insight keyword." },
+                                    "Bookmark Resource Keyword": { description: "Bookmark resource keyword." },
+                                    "Open Keyword Resource": { description: "Open keyword resource." },
+                                    "Search Resource Identities": { description: "Search within the displayed identity results in Resource Insights." },
+                                    "View Matched Resource Identities": { description: "View identities classified as matched/known identities." },
+                                    "View Unknown Resource Identities": { description: "View identities classified as unknown identities." },
+                                    "View Identity Quick Profile": { description: "Open the Quick Profile for a selected identity." },
+                                    "Filter Identity": { description: "Filter identity." },
+                                    "Search Resource Languages": { description: "Search within the displayed language results in Resource Insights." },
+                                    "Add Resource to Caseboard": { description: "Add the current resource to the case board." },
+                                    "Bookmark Resource Screenshot": { description: "Capture and bookmark the current resource view as a screenshot." },
+                                    "Add Resource Flag": { description: "Add or manage a flag on the current resource." },
+                                    "View Resource Information": { description: "View information and metadata for the current resource." },
+                                    "Highlight Resource Content": { description: "Highlight selected text." },
+                                    "Bookmark Resource Content": { description: "Bookmark a selected text highlight from the current resource." },
+                                    "Use Optional Analytics": { description: "Use optional analytics." },
+                                    "Recheck Authenticity": { description: "Fake content detection." }
+                                }
+                            },
+                            "Pending Action": {
+                                count: 4,
+                                label: "View Pending Action",
+                                description: "Pending Action section.",
+                                children: {
+                                    "Find Pending Action": { description: "Allow the user to search/filter the Pending Action list using the Find field." },
+                                    "Select Pending Action": { description: "Allow the user to select one or more Pending Action items for subsequent actions." },
+                                    "Proceed to Analysis": { description: "Allow the user to proceed from the Pending Action screen to the analysis flow." }
+                                }
+                            },
+                            "Case Diary": {
+                                count: 3,
+                                label: "View Case Diary",
+                                description: "Case Diary section.",
+                                children: {
+                                    "Create Case Diary Entry": { description: "Create a new Case Diary entry using the New Entry action and entry form." },
+                                    "Export Case Diary": { description: "Export the Case Diary entries for the current case as a CSV file." }
+                                }
+                            }
+                        }
+                    },
+                    "View Graph View": { description: "Page-level control to switch the current case page to visual/graphical representation." },
+                    "View Tabular View": { description: "Page-level control to switch the current case page to detailed-record/table representation." },
+                    "View Smart Insights": { description: "Page-level access to open the Smart Insights capability from the case Summary page." },
+                    "View Filter in Case": { description: "View Filter in Case." }
+                }
+            },
+            "Data Repo": {
+                label: "View Data Repo",
+                description: "Standalone Data Repo module."
+            },
+            "Legal": {
+                label: "View Legal",
+                description: "Standalone Legal module."
+            },
+            "Targets": {
+                count: 113,
+                label: "View Targets",
+                description: "Standalone Targets module. Also enables target list view.",
+                children: {
+                    "Target List": {
+                        count: 10,
+                        children: {
+                            "Find Target List": { description: "Allows use of the Find/Search field on the target list." },
+                            "View Target Profile Quick View": { description: "Allows the user to open the Profile Quick View panel by selecting a target from the Target List." },
+                            "Create Target": { description: "Allows use of Add New Target to create a target." },
+                            "View Complete Target Profile": { description: "Allows opening the complete Target/Suspect/EOI profile from the row action menu." },
+                            "Edit Target Attributes": { description: "Allows editing target profile attributes from the row action menu." },
+                            "Deactivate Target": { description: "Allows deactivating an active target from the row action menu." },
+                            "Mark Target": { description: "Allows changing a Suspect record to Target through the row action menu." },
+                            "Bookmark Target": { description: "Allows bookmarking the target from either the Target List or Profile Quick View action menu." },
+                            "Pin Target Profile Quick View": { description: "Controls the pin/unpin action for the Profile Quick View panel." },
+                            "Bookmark Target Screenshot": { description: "Allows bookmarking/saving the target's profile screenshot from the Profile Quick View action menu." }
+                        }
+                    },
+                    "Target Profile": {
+                        count: 95,
+                        children: {
+                            "Summary": {
+                                count: 35,
+                                label: "View Target Profile Summary",
+                                description: "Allows access to the Summary tab of the Target Profile.",
+                                children: {
+                                    "View Target Profile Sentiment": { description: "Allows the user to view the Sentiment widget in the Target Profile Summary." },
+                                    "View Target Profile Timeline": { description: "View Target Profile Timeline." },
+                                    "View Target Profile Domains": { description: "View Target Profile Domains." },
+                                    "View Linked Target Profiles": { description: "View Linked Target Profiles." },
+                                    "View Target Profile Applications": { description: "View Target Profile Applications." },
+                                    "View Associated Cases": { description: "View Associated Cases." },
+                                    "Keywords": {
+                                        count: 8,
+                                        label: "View Target Keyword Cloud",
+                                        children: {
+                                            "Target Keyword Event Actions": { description: "Add to filter, exclude, copy, investigate, search" },
+                                            "View Target Keyword Anomalies": { description: "View anomalies associated with the selected keyword/entity." },
+                                            "Preview Target Keyword Resource": { description: "Preview a resource associated with the selected keyword/entity." },
+                                            "Keywords – Bookmark Resource": { description: "Allows bookmarking a resource shown under Keywords in the Target Profile Summary." },
+                                            "Keywords – Go to Resources": { description: "Allows navigating from a Keywords resource card to the Resources view." }
+                                        }
+                                    },
+                                    "Connections": {
+                                        count: 10,
+                                        label: "View Target Connections",
+                                        children: {
+                                            "Target Connection Event Actions": { description: "Search, Add to filter, exclude, copy, Information" },
+                                            "Find Target Shortest Connection Path": { description: "Find Target Shortest Connection Path." },
+                                            "Change Target Connection Graph Layout": { description: "Change the graph layout using the available Layout control." },
+                                            "View Target Connection Graph Controls": { description: "Open the Graph Controls panel for connection-graph display/analysis settings." },
+                                            "View Target Connection Anomalies": { description: "View anomalies associated with the selected connection/entity." },
+                                            "View Target Connection Resources": { description: "View resources associated with the selected connection/entity." },
+                                            "Preview Target Connection Resource": { description: "Preview a resource associated with the selected connection/entity." },
+                                            "Bookmark Connection Screenshot": { description: "Bookmark Connection Screenshot." }
+                                        }
+                                    },
+                                    "Locations": {
+                                        count: 10,
+                                        label: "View Target Locations",
+                                        children: {
+                                            "View Target Location Movement": { description: "View Target Location Movement." },
+                                            "Show Target Location Entities": { description: "Show Target Location Entities." },
+                                            "Show Target Location Geofences": { description: "Show Target Location Geofences." },
+                                            "Target Location Event Actions": { description: "Target Location Event Actions." },
+                                            "View Target Location Anomalies": { description: "View Target Location Anomalies." },
+                                            "Locations – View Locations": { description: "View Locations." },
+                                            "Preview Target Location Resource": { description: "Allows previewing a resource associated with Locations in the Target Profile Summary." },
+                                            "Locations – Bookmark Resource": { description: "Allows bookmarking a resource shown under Locations in the Target Profile Summary." },
+                                            "Locations – Go to Resources": { description: "Allows navigating from a Locations resource card to the Resources view." }
+                                        }
+                                    }
+                                }
+                            },
+                            "View Target Profile Resources": { description: "Allows access to the Resources tab of the Target Profile." },
+                            "View Target Profile Pattern of Life": { description: "Allows access to the Pattern of Life tab of the Target Profile." },
+                            "Use Target Profile Visual View": { description: "Controls switching the Target Profile display to Visual View." },
+                            "View Target Profile Tabular View": { description: "Controls switching the Target Profile display to Detailed Records View." },
+                            "Bookmark Target Profile Screenshot": { description: "Allows bookmarking/saving a screenshot from the Target Profile." },
+                            "Personal Information": {
+                                count: 20,
+                                label: "View Personal Information",
+                                children: {
+                                    "Basic Info": {
+                                        count: 7,
+                                        label: "View Basic Info",
+                                        description: "Controls access to the Basic Info tab.",
+                                        children: {
+                                            "Edit Basic Attributes": { description: "Allows editing the Basic Attributes section." },
+                                            "Add Gallery Image": { description: "Allows adding another image to the Gallery." },
+                                            "Delete Gallery Image": { description: "Delete Gallery Image." },
+                                            "Set Profile Photo": { description: "Set Profile Photo." },
+                                            "Add Nickname or Alias": { description: "Allows adding another nickname or previous alias." },
+                                            "Add Citizenship": { description: "Allows adding another citizenship record." }
+                                        }
+                                    },
+                                    "Physical Characteristics": {
+                                        count: 2,
+                                        label: "View Physical Characteristics",
+                                        description: "Controls access to the Physical Characteristics tab.",
+                                        children: {
+                                            "Edit Physical Characteristics": { description: "Allows editing the Physical Characteristics section through its section-level edit action." }
+                                        }
+                                    },
+                                    "Biometric Information": {
+                                        count: 5,
+                                        label: "View Biometric Information",
+                                        description: "Controls access to the Biometric Information tab.",
+                                        children: {
+                                            "Add Voice Sample": { description: "Allows adding a voice sample." },
+                                            "Delete Voice Sample": { description: "Allows deleting an existing voice sample through the visible delete action." },
+                                            "Add Fingerprint Record": { description: "Allows adding a fingerprint record." },
+                                            "Delete Fingerprint Record": { description: "Allows deleting an existing fingerprint record through the visible delete action." }
+                                        }
+                                    },
+                                    "Professional Info": {
+                                        count: 3,
+                                        label: "View Professional Info",
+                                        description: "Controls access to the Professional Info tab.",
+                                        children: {
+                                            "Add Professional Information": { description: "Allows adding a professional information record." },
+                                            "Edit Professional Information": { description: "Allows editing an existing professional information record through the row action." }
+                                        }
+                                    },
+                                    "Educational Qualifications": {
+                                        count: 3,
+                                        label: "View Educational Qualifications",
+                                        description: "Controls access to the Educational Qualifications tab.",
+                                        children: {
+                                            "Add Educational Qualification": { description: "Allows adding an educational qualification record." },
+                                            "Edit Educational Qualification": { description: "Allows editing an existing educational qualification through the row action." }
+                                        }
+                                    },
+                                    "Additional Information": {
+                                        count: 2,
+                                        label: "View Additional Information",
+                                        description: "Controls access to the Additional Information tab.",
+                                        children: {
+                                            "Add Hobby": { description: "Allows adding a hobby." }
+                                        }
+                                    }
+                                }
+                            },
+                            "Bank & Assets Details": {
+                                count: 15,
+                                label: "View Bank & Assets Details",
+                                children: {
+                                    "Bank Accounts": {
+                                        count: 3,
+                                        label: "View Bank Accounts",
+                                        description: "Controls access to the Bank Accounts tab.",
+                                        children: {
+                                            "Add Bank Account": { description: "Allows adding a bank account record through the Add Bank Account action." },
+                                            "Edit Bank Account": { description: "Allows editing an existing bank account record through the row action." }
+                                        }
+                                    },
+                                    "Properties": {
+                                        count: 3,
+                                        label: "View Properties",
+                                        description: "Controls access to the Properties tab.",
+                                        children: {
+                                            "Add Property": { description: "Allows adding a property record through the Add Property action." },
+                                            "Edit Property": { description: "Allows editing an existing property record through the row action." }
+                                        }
+                                    },
+                                    "Vehicles": {
+                                        count: 3,
+                                        label: "View Vehicles",
+                                        description: "Controls access to the Vehicles tab.",
+                                        children: {
+                                            "Add Vehicle": { description: "Allows adding a vehicle record through the Add Vehicle action." },
+                                            "Edit Vehicle": { description: "Allows editing an existing vehicle record through the row action." }
+                                        }
+                                    },
+                                    "Arms & Weapons": {
+                                        count: 3,
+                                        label: "View Arms & Weapons",
+                                        description: "Controls access to the Arms & Weapons tab.",
+                                        children: {
+                                            "Add Arms & Weapons": { description: "Allows adding an arms and weapons record through the Add Arms and Weapons action." },
+                                            "Edit Arms & Weapons": { description: "Allows editing an existing arms and weapons record through the row action." }
+                                        }
+                                    }
+                                }
+                            },
+                            "Family Details": {
+                                count: 3,
+                                label: "View Family Details",
+                                description: "Controls access to the Family Details section within the Target Profile.",
+                                children: {
+                                    "Add Family Details": { description: "Allows adding a family details record through the Add Family Details action." },
+                                    "Edit Family Details": { description: "Allows editing an existing family details record through the row action." }
+                                }
+                            },
+                            "Travel Details": {
+                                count: 3,
+                                label: "View Travel Details",
+                                description: "Controls access to the Travel Details section within the Target Profile.",
+                                children: {
+                                    "Add Travel Details": { description: "Allows adding a travel details record through the Add Travel Details action." },
+                                    "Edit Travel Details": { description: "Allows editing an existing travel details record through the row action." }
+                                }
+                            },
+                            "Criminal Details": {
+                                count: 3,
+                                label: "View Criminal Details",
+                                description: "Controls access to the Criminal Details section within the Target Profile.",
+                                children: {
+                                    "Add Criminal History": { description: "Allows adding a criminal history record through the Add Criminal History action." },
+                                    "Edit Criminal History": { description: "Allows editing an existing criminal history record through the row action." }
+                                }
+                            },
+                            "Devices and Network": {
+                                count: 3,
+                                label: "View Devices and Network",
+                                description: "Controls access to the Devices and Network section within the Target Profile.",
+                                children: {
+                                    "Add Devices and Network": { description: "Allows adding a Devices and Network record through the Add Devices and Network action." },
+                                    "Edit Devices and Network": { description: "Allows editing an existing Devices and Network record through the row action." }
+                                }
+                            },
+                            "Government ID Details": {
+                                count: 3,
+                                label: "View Government ID Details",
+                                description: "Controls access to the Government ID Details section within the Target Profile.",
+                                children: {
+                                    "Add Government ID Details": { description: "Allows adding a government ID record through the Add Government ID Details action." },
+                                    "Edit Government ID Details": { description: "Allows editing an existing government ID record through the row action." }
+                                }
+                            },
+                            "Audit Trail": {
+                                count: 3,
+                                label: "View Target Audit Trail",
+                                description: "Controls access to the Audit Trail section within the Target Profile.",
+                                children: {
+                                    "Search Target Audit Trail": { description: "Allows the user to search the displayed target-profile audit records using the Find field." },
+                                    "Filter Target Audit Trail": { description: "Allows the user to filter audit records by Date Range, User and Event." }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Reports": {
+                count: 42,
+                label: "View Reports",
+                description: "Standalone Reports module.",
+                children: {
+                    "Dashboards": {
+                        count: 13,
+                        label: "View Dashboards",
+                        description: "Controls access to the Dashboards tab.",
+                        children: {
+                            "View Case Management Analysis Dashboard": { description: "Controls visibility and access to the Case Management Analysis dashboard." },
+                            "View Device and Usage Dashboard": { description: "Controls visibility and access to the Device and Usage dashboard." },
+                            "View Forensic Analysis Dashboard": { description: "Controls visibility and access to the Forensic Analysis dashboard." },
+                            "View Fusion Analysis Dashboard": { description: "Controls visibility and access to the Fusion Analysis dashboard." },
+                            "View Internet and Data Usage Dashboard": { description: "Controls visibility and access to the Internet and Data Usage dashboard." },
+                            "View IPDR Analysis Dashboard": { description: "Controls visibility and access to the IPDR Analysis dashboard." },
+                            "View Location and Mobility Dashboard": { description: "Controls visibility and access to the Location and Mobility dashboard." },
+                            "View Open Source Intelligence Dashboard": { description: "Controls visibility and access to the Open Source Intelligence dashboard." },
+                            "View STR Analysis Dashboard": { description: "Controls visibility and access to the STR Analysis dashboard." },
+                            "View Tariff Impact Monitoring Dashboard": { description: "Controls visibility and access to the Tariff Impact Monitoring dashboard." },
+                            "View Unstructured Data Analysis Dashboard": { description: "Controls visibility and access to the Unstructured Data Analysis dashboard." },
+                            "View User Communication and Activity Dashboard": { description: "Controls visibility and access to the User Communication and Activity dashboard." }
+                        }
+                    },
+                    "Reports Tab": {
+                        count: 22,
+                        label: "View Reports Tab",
+                        description: "Controls access to the Reports tab.",
+                        children: {
+                            "Create Custom Report": { description: "Allows the user to create a new custom report using the Add New Report action." },
+                            "View Common Cell ID Analysis Report": { description: "Controls visibility and access to the canned report 'Common Cell ID Analysis' (CDR)." },
+                            "View Common Devices by Cell ID Report": { description: "Controls visibility and access to the canned report 'Common Devices by Cell ID' (CDR)." },
+                            "View IMEI with Multiple Mobile Number Report": { description: "Controls visibility and access to the canned report 'IMEI with Multiple Mobile Number' (CDR)." },
+                            "View Inactivity Analysis Post-Incident Report": { description: "Controls visibility and access to the canned report 'Inactivity Analysis Post-Incident' (CDR)." },
+                            "View Incoming/Outgoing Call Ratio Report": { description: "Controls visibility and access to the canned report 'Incoming or Outgoing Call Ratio Report' (CDR)." },
+                            "View Low Activity Phone Numbers Report": { description: "Controls visibility and access to the canned report 'Low Activity Phone Numbers' (CDR)." },
+                            "View Mobile Numbers with Multiple IMEIs Report": { description: "Controls visibility and access to the canned report 'Mobile Numbers with Multiple IMEIs' (CDR)." },
+                            "View Number Status Shift After Incident Report": { description: "Controls visibility and access to the canned report 'Number Status Shift After Incident' (CDR)." },
+                            "View Sandwich Call Analysis Report": { description: "Controls visibility and access to the canned report 'Sandwich Call Analysis' (CDR)." },
+                            "View Target-wise Call Summary Report": { description: "Controls visibility and access to the canned report 'Target Wise Call Summary Report' (CDR)." },
+                            "View Probable Suspect Analysis Report": { description: "Controls visibility and access to the canned report 'Probable Suspect Analysis' (CDR and IPDR)." },
+                            "View Probable Meeting Points Report": { description: "Controls visibility and access to the canned report 'Probable Meeting Points Report' (CDR and IPDR and PCAP)." },
+                            "View Coordinated Digital Activity Report": { description: "Controls visibility and access to the canned report 'Coordinated Digital Activity Report' (IPDR and PCAP)." },
+                            "View Time-selective Activity Analysis Report": { description: "Controls visibility and access to the canned report 'Time Selective Activity Analysis' (IPDR and PCAP)." },
+                            "View VPN and TOR Usage Report": { description: "Controls visibility and access to the canned report 'VPN and TOR Usage Report' (IPDR and PCAP)." },
+                            "View Location Report": { description: "Controls visibility and access to the canned report 'Location Report' (OSINT)." },
+                            "View Top Hashtags with Sentiments Report": { description: "Controls visibility and access to the canned report 'Top Hashtag with Sentiments' (OSINT)." },
+                            "View Top Influencers with Sentiments Report": { description: "Controls visibility and access to the canned report 'Top Influencers with Sentiments' (OSINT)." }
+                        }
+                    },
+                    "View Async Reports": { description: "Controls access to the Async Reports tab." },
+                    "View Published Reports": { description: "Controls access to the Published Reports tab." }
+                }
+            },
+            "Add Ons": {
+                label: "View Add Ons",
+                description: "Standalone Add Ons module."
+            },
+            "Profile": {
+                count: 5,
+                label: "View Profile",
+                description: "Standalone Profile module.",
+                children: {
+                    "Edit Contact Information": { description: "Allows the user to edit Email ID and Mobile Number. Contact information remains visible/read-only when this permission is not granted." },
+                    "Edit Preferences": { description: "Allows the user to edit Theme, Language, Timezone, Date & Time Format, Number Format, Decimal Places and Number System." },
+                    "Audit Trail": {
+                        count: 2,
+                        label: "View Profile Audit Trail",
+                        description: "Controls access to the Audit Trail section within Profile Settings.",
+                        children: {
+                            "Filter Profile Audit Trail": { description: "Allows the user to open and apply Audit Trail filters such as Date Range, Event and Module." }
+                        }
+                    }
+                }
+            },
+            "Gen AI": {
+                count: 23,
+                children: {
+                    "Chat": {
+                        count: 15,
+                        label: "View Gen AI",
+                        description: "Controls access to the Gen AI chat experience.",
+                        children: {
+                            "Clear Chat": { description: "Clears the current Gen AI conversation." },
+                            "View Related Resources and Results": { description: "Allows access to related resources/results surfaced from an AI response." },
+                            "Submit Message Feedback": { description: "Allows the user to submit positive/negative feedback on an AI response." },
+                            "Open Full Screen": { description: "Open the active Gen AI conversation in full-screen mode." },
+                            "Create Chat Thread": { description: "Create a new conversation thread within the current case/context." },
+                            "Rename Chat Thread": { description: "Edit/rename the active conversation thread title." },
+                            "Copy AI Response": { description: "Allows the user to copy an AI-generated response." },
+                            "Bookmark AI Response": { description: "Allows the user to pin an AI-generated response." },
+                            "Remove AI Response": { description: "Allows the user to remove an individual AI response/message from the conversation." },
+                            "Submit AI Response Feedback": { description: "Allows the user to submit positive/negative feedback on an AI response. If negative - allows Open Feedback Form." },
+                            "Bookmark AI Response Screenshot": { description: "Bookmark AI Response Screenshot." }
+                        }
+                    },
+                    "Chat History": {
+                        count: 6,
+                        label: "View Chat History",
+                        description: "Controls access to the Chat History panel containing case chats and conversation threads.",
+                        children: {
+                            "Search Chat Threads": { description: "Search/filter conversation threads using the Find field." },
+                            "Rename Chat History Thread": { description: "Rename an existing thread from Chat History." },
+                            "Delete Chat Thread": { description: "Delete an existing thread from Chat History." },
+                            "Create Chat History Thread": { description: "Create a new thread from the Chat History panel." }
+                        }
+                    }
+                }
+            }
+        };
+
+        // Count total permissions
+        function countAllPermissions(data) {
+            let count = 0;
+            for (const [name, config] of Object.entries(data)) {
+                count++;
+                if (config.children && Object.keys(config.children).length > 0) {
+                    count += countAllPermissions(config.children);
+                }
+            }
+            return count;
+        }
+
+        // Generate unique ID
+        function generateId(name, parentId) {
+            const safeName = name.replace(/[^a-zA-Z0-9]/g, '_');
+            return parentId ? `${parentId}__${safeName}` : safeName;
+        }
+
+        // Generate permission_id format similar to the catalogue
+        function generatePermissionId(module, component, operation) {
+            const formatSegment = (str) => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            const moduleSegment = formatSegment(module);
+            const componentSegment = component ? formatSegment(component) : '';
+            const operationSegment = operation ? formatSegment(operation) : '';
+            
+            if (operationSegment && componentSegment) {
+                return `${moduleSegment}:${componentSegment}:${operationSegment}`;
+            } else if (componentSegment) {
+                return `${moduleSegment}:${componentSegment}`;
+            }
+            return moduleSegment;
+        }
+
+        // Flatten permissions for Excel export - recursively processes all nodes
+        function flattenPermissions(data, rows = [], moduleName = '', componentPath = '', level = 'L1', sortOrder = { value: 1 }) {
+            for (const [name, config] of Object.entries(data)) {
+                const id = generateId(name, moduleName ? moduleName.replace(/[^a-zA-Z0-9]/g, '_') : '');
+                const hasChildren = config.children && Object.keys(config.children).length > 0;
+                const isGranted = permissionStates[id] !== false;
+                
+                let currentModule = moduleName;
+                let currentComponent = componentPath;
+                let currentLevel = level;
+                let operation = '';
+                let permissionLabel = config.label || name;
+                
+                if (level === 'L1') {
+                    currentModule = name;
+                    currentComponent = '';
+                    operation = 'View';
+                } else if (level === 'L2') {
+                    currentComponent = name;
+                    operation = 'View';
+                } else {
+                    operation = name;
+                }
+
+                const fullPath = currentComponent ? `${currentModule} > ${currentComponent}` : currentModule;
+                const permissionId = generatePermissionId(currentModule || name, currentComponent, operation);
+                
+                rows.push({
+                    'Sort Order': sortOrder.value++,
+                    'Module': currentModule || name,
+                    'Level': currentLevel,
+                    'Component / Screen / Path': fullPath,
+                    'Operation / Permission': operation,
+                    'Permission UI Label': permissionLabel,
+                    'Permission ID': permissionId,
+                    'Description': config.description || '',
+                    'Permission Value': 'Yes / No',
+                    'Status': isGranted ? 'Granted' : 'Denied',
+                    'Has Children': hasChildren ? 'Yes' : 'No',
+                    'Child Count': config.count || (hasChildren ? Object.keys(config.children).length : '')
+                });
+                
+                if (hasChildren) {
+                    const nextLevel = currentLevel === 'L1' ? 'L2' : 'L3';
+                    const nextComponent = currentLevel === 'L1' ? '' : (currentComponent ? `${currentComponent} > ${name}` : name);
+                    flattenPermissions(
+                        config.children, 
+                        rows, 
+                        currentModule || name, 
+                        nextComponent,
+                        nextLevel,
+                        sortOrder
+                    );
+                }
+            }
+            
+            return rows;
+        }
+
+        // Export to Excel function
+        function exportPermissionsToExcel() {
+            const roleName = document.getElementById('roleName').textContent;
+            const rows = flattenPermissions(permissionsData);
+            
+            // Create workbook and worksheet
+            const wb = XLSX.utils.book_new();
+            
+            // Create Role Info sheet
+            const roleInfo = [
+                ['Infinium Permission Export'],
+                [''],
+                ['Role Name', roleName],
+                ['Description', 'Supervisor role with broad access'],
+                ['No. of Users', 4],
+                ['Status', 'Active'],
+                ['Export Date', new Date().toLocaleString()],
+                ['Total Permissions', rows.length],
+                ['Granted', rows.filter(r => r.Status === 'Granted').length],
+                ['Denied', rows.filter(r => r.Status === 'Denied').length]
+            ];
+            const wsRoleInfo = XLSX.utils.aoa_to_sheet(roleInfo);
+            wsRoleInfo['!cols'] = [{ wch: 20 }, { wch: 40 }];
+            XLSX.utils.book_append_sheet(wb, wsRoleInfo, 'Role Info');
+            
+            // Create Permissions sheet
+            const wsPermissions = XLSX.utils.json_to_sheet(rows);
+            
+            // Set column widths
+            wsPermissions['!cols'] = [
+                { wch: 10 },  // Sort Order
+                { wch: 20 },  // Module
+                { wch: 8 },   // Level
+                { wch: 50 },  // Component / Screen / Path
+                { wch: 40 },  // Operation / Permission
+                { wch: 45 },  // Permission UI Label
+                { wch: 60 },  // Permission ID
+                { wch: 80 },  // Description
+                { wch: 12 },  // Permission Value
+                { wch: 10 },  // Status
+                { wch: 12 },  // Has Children
+                { wch: 12 }   // Child Count
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, wsPermissions, 'Permissions');
+            
+            // Create Summary sheet by Module
+            const summary = [
+                ['Module', 'Total Permissions', 'Granted', 'Denied', 'Grant Rate (%)'],
+            ];
+            
+            const moduleStats = {};
+            rows.forEach(row => {
+                if (!moduleStats[row.Module]) {
+                    moduleStats[row.Module] = { total: 0, granted: 0, denied: 0 };
+                }
+                moduleStats[row.Module].total++;
+                if (row.Status === 'Granted') {
+                    moduleStats[row.Module].granted++;
+                } else {
+                    moduleStats[row.Module].denied++;
+                }
+            });
+            
+            for (const [module, stats] of Object.entries(moduleStats)) {
+                const grantRate = ((stats.granted / stats.total) * 100).toFixed(1);
+                summary.push([module, stats.total, stats.granted, stats.denied, `${grantRate}%`]);
+            }
+            
+            // Add totals row
+            const totalGranted = rows.filter(r => r.Status === 'Granted').length;
+            const totalDenied = rows.filter(r => r.Status === 'Denied').length;
+            const totalRate = ((totalGranted / rows.length) * 100).toFixed(1);
+            summary.push(['']);
+            summary.push(['TOTAL', rows.length, totalGranted, totalDenied, `${totalRate}%`]);
+            
+            const wsSummary = XLSX.utils.aoa_to_sheet(summary);
+            wsSummary['!cols'] = [
+                { wch: 30 },
+                { wch: 18 },
+                { wch: 10 },
+                { wch: 10 },
+                { wch: 15 }
+            ];
+            XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary by Module');
+            
+            // Create Level Summary sheet
+            const levelSummary = [
+                ['Level', 'Description', 'Total Permissions', 'Granted', 'Denied'],
+                ['L1', 'Module-level permissions', 0, 0, 0],
+                ['L2', 'Component/Screen-level permissions', 0, 0, 0],
+                ['L3', 'Operation-level permissions', 0, 0, 0]
+            ];
+            
+            rows.forEach(row => {
+                const levelIndex = row.Level === 'L1' ? 1 : (row.Level === 'L2' ? 2 : 3);
+                levelSummary[levelIndex][2]++;
+                if (row.Status === 'Granted') {
+                    levelSummary[levelIndex][3]++;
+                } else {
+                    levelSummary[levelIndex][4]++;
+                }
+            });
+            
+            const wsLevelSummary = XLSX.utils.aoa_to_sheet(levelSummary);
+            wsLevelSummary['!cols'] = [
+                { wch: 10 },
+                { wch: 40 },
+                { wch: 18 },
+                { wch: 10 },
+                { wch: 10 }
+            ];
+            XLSX.utils.book_append_sheet(wb, wsLevelSummary, 'Summary by Level');
+            
+            // Generate filename with date
+            const date = new Date().toISOString().split('T')[0];
+            const filename = `Infinium_Permissions_${roleName}_${date}.xlsx`;
+            
+            // Download file
+            XLSX.writeFile(wb, filename);
+            
+            // Show toast notification
+            showToast(`Excel file downloaded with ${rows.length} permissions!`);
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Update stats display
+        function updateStats() {
+            let total = 0;
+            let granted = 0;
+            let denied = 0;
+            
+            for (const [id, state] of Object.entries(permissionStates)) {
+                total++;
+                if (state) {
+                    granted++;
+                } else {
+                    denied++;
+                }
+            }
+            
+            document.getElementById('totalPermissions').textContent = total;
+            document.getElementById('grantedCount').textContent = granted;
+            document.getElementById('deniedCount').textContent = denied;
+        }
+
+        // Render a single permission node
+        function renderPermissionNode(name, config, level, parentId) {
+            const id = generateId(name, parentId);
+            const hasChildren = config.children && Object.keys(config.children).length > 0;
+            const count = config.count && config.count > 1 ? config.count : null;
+            const displayName = config.label || name;
+            
+            // Initialize permission state (default is granted/checked)
+            if (permissionStates[id] === undefined) {
+                permissionStates[id] = true;
+            }
+            const isChecked = permissionStates[id];
+            
+            let html = `
+                <div class="tree-node">
+                    <div class="permission-row indent-${level}" data-id="${id}">
+                        <div class="permission-name">
+                            <div class="permission-name-content">
+                                ${hasChildren ? `
+                                    <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="toggleExpand('${id}')">
+                                        <path d="M9 18l6-6-6-6"/>
+                                    </svg>
+                                ` : `<svg class="expand-icon hidden" viewBox="0 0 24 24"></svg>`}
+                                <span>${displayName}</span>
+                                ${count ? `<span class="permission-badge">${count}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="permission-description ${!config.description ? 'empty-description' : ''}">
+                            ${config.description || '—'}
+                        </div>
+                        <div class="permission-status">
+                            <div class="checkbox-toggle ${isChecked ? '' : 'unchecked'}" onclick="toggleCheckbox(this, '${id}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    ${hasChildren ? `
+                        <div class="children-container" id="children-${id}">
+                            ${renderChildren(config.children, level + 1, id)}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // Render children nodes
+        function renderChildren(children, level, parentId) {
+            let html = '';
+            for (const [name, config] of Object.entries(children)) {
+                html += renderPermissionNode(name, config, level, parentId);
+            }
+            return html;
+        }
+
+        // Render the full permission tree
+        function renderPermissionTree(data) {
+            let html = '';
+            for (const [name, config] of Object.entries(data)) {
+                html += renderPermissionNode(name, config, 0, '');
+            }
+            return html;
+        }
+
+        // Toggle expand/collapse
+        function toggleExpand(id) {
+            const children = document.getElementById(`children-${id}`);
+            const row = document.querySelector(`[data-id="${id}"]`);
+            const icon = row.querySelector('.expand-icon');
+            
+            if (children) {
+                children.classList.toggle('expanded');
+                icon.classList.toggle('expanded');
+            }
+        }
+
+        // Toggle checkbox and track state
+        function toggleCheckbox(element, id) {
+            element.classList.toggle('unchecked');
+            permissionStates[id] = !element.classList.contains('unchecked');
+            updateStats();
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.permission-row');
+            const containers = document.querySelectorAll('.children-container');
+            
+            if (searchTerm === '') {
+                rows.forEach(row => row.style.display = '');
+                containers.forEach(container => container.classList.remove('expanded'));
+                document.querySelectorAll('.expand-icon').forEach(icon => icon.classList.remove('expanded'));
+            } else {
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        row.style.display = '';
+                        let parent = row.parentElement;
+                        while (parent) {
+                            if (parent.classList.contains('children-container')) {
+                                parent.classList.add('expanded');
+                                const parentId = parent.id.replace('children-', '');
+                                const parentRow = document.querySelector(`[data-id="${parentId}"]`);
+                                if (parentRow) {
+                                    const icon = parentRow.querySelector('.expand-icon');
+                                    if (icon) icon.classList.add('expanded');
+                                }
+                            }
+                            parent = parent.parentElement;
+                        }
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        // Initialize
+        document.getElementById('permissionsTree').innerHTML = renderPermissionTree(permissionsData);
+        updateStats();
+    </script>
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
